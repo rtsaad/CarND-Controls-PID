@@ -12,12 +12,10 @@ The following files are part of this project:
 * pid.cpp:   PID controller class definition;
 * main.cpp:  main file that integrates the PID controller with the simulator.
 * images: 
-** fusion_data1.png:  Estimation using Lidar and Radar readings for dataset 1;
-** fusion_data2.png:  Estimation using Lidar and Radar readings for dataset 2;
-** nis_radar.png:  NIS values for radar estimations;
-** nis_laser.png:  NIS values for lidar estimations;
-** lidar.png:    Estimation using only Lidar readings;
-** radar.png: Estimation using only Radar readings;
+** kp.mp4:  P controller (mannually tuned) driving the car;
+** kd.mp4:  PD controller (mannually tuned) driving the car;
+** ki.mp4:  PID controller (mannually tuned) driving the car;
+** pid.mp4:  Final PID controller (auto tuned) driving the car;
 
 ### 2.1 Dependency
 
@@ -73,9 +71,7 @@ The Ki gain reduces the persistent error, i.e. the accumulated error. The integr
 The PID tuning for this project followed a mix of manual and automatic tuning approaches. First, due to the simulation time (~90 seconds) required to evaluate a set of PID gains, we decided to first follow a manual approach to find the gain orders. We observed the following orders of magnitude for the PID gains:
 
 * Proportional: order of 0.01
-
 * Integral: order of 0.001
-
 * Derivative: order of 0.1
 
 
@@ -88,9 +84,9 @@ The twiddle algorithm evaluates every new set of parameters and checks if the er
 
 The final PID controller successfully drives the car around the track without pop up onto ledges or roll over any surfaces that would otherwise be considered unsafe (if humans where in the vehicle). The file PID parameters are shown below:
 
-⋅⋅* Kp: 0.11441
-..* Ki: 0.0084755
-..* Kd: 0.7801
+* Kp: 0.11441
+* Ki: 0.0084755
+* Kd: 0.7801
 
 This [video](https://github.com/otomata/CarND-Controls-PID/blob/master/images/pid.mp4) shows the car driving around the corner with the PID controller set with the parameters presented above. 
 
