@@ -72,15 +72,17 @@ The Ki gain reduces the persistent error, i.e. the accumulated error. The integr
 
 The PID tuning for this project followed a mix of manual and automatic tuning approaches. First, due to the simulation time (~90 seconds) required to evaluate a set of PID gains, we decided to first follow a manual approach to find the gain orders. We observed the following orders of magnitude for the PID gains:
 
-⋅⋅* Proportional: order of 0.01
-..* Integral: order of 0.001
-..* Derivative: order of 0.1
+* Proportional: order of 0.01
+
+* Integral: order of 0.001
+
+* Derivative: order of 0.1
 
 
 The second step it to use the [Twiddle Algorithm](https://martin-thoma.com/twiddle/) to fine tuning the PID gains. We used the gain orders we had previously manually found to help the Twiddle algorithm to converge faster by setting the tiwdle starting vectors to: 
 
-..* Initial PID Vector: {0.06, 0.006, 0.7} (values manually tunned)
-..* Potential changes: {.01,.001,.1}
+* Initial PID Vector: {0.06, 0.006, 0.7} (values manually tunned)
+* Potential changes: {.01,.001,.1}
 
 The twiddle algorithm evaluates every new set of parameters and checks if the error is smaller. If the error is greater, the potential change vector is changed and a new set of parameters is attempted. However, because of the different corners radius of the track, we have to evaluate the PID controller into a long run, in order to test if the set of parameter (gains) is well adapted for the track, and not only for a small subset. This approach makes the experiment really long; 40 iterations took almost one hour; we have decided to stop the algorithm after 100 iterations. 
 
