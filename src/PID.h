@@ -11,20 +11,14 @@ public:
   */
   double p_error;
   double i_error;
-  std::list<double> i_error_list;
   double d_error;
-  //Previous error
-  double prev_error;
+  
   //Total error
   double error;
 
   //setpoint
   double setpoint;
   long int n;
-
-  //last timestamp  
-  std::chrono::time_point<std::chrono::system_clock> timestamp;
-  
 
   /*
   * Coefficients

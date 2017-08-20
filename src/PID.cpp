@@ -43,33 +43,6 @@ void PID::Change(double kp, double ki, double kd) {
 }
 
 void PID::UpdateError(double cte) {  
-  /*if(prev_error == 0){
-    prev_error = cte;
-    timestamp = std::chrono::system_clock::now();
-  }
-  
-  std::chrono::time_point<std::chrono::system_clock> current_time;
-  current_time = std::chrono::system_clock::now();
-
-  std::chrono::duration<double> elipsed_time;
-  elipsed_time = current_time - timestamp;
-  timestamp = current_time;
-
-  if(elipsed_time.count() == 0){
-    d_error  = 0;
-    i_error = 0;
-  } else {
-    d_error  = (cte - p_error)/(elipsed_time.count());    
-    i_error += cte*elipsed_time.count();    
-  }  
-
-  prev_error = cte;
-  p_error  = cte;
-
-  error += cte*cte;
-  n++;
-  */
-
   if(setpoint!=0){
     cte -= setpoint;
   }

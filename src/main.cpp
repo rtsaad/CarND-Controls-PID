@@ -16,15 +16,25 @@ constexpr double pi() { return M_PI; }
 double deg2rad(double x) { return x * pi() / 180; }
 double rad2deg(double x) { return x * 180 / pi(); }
 
-//twiddle configuration
-bool auto_tunning = true;
+/*
+ * Twiddle 
+ * Use twiddle algorithm to search for the best PID gains.
+ * Use xdotool to restart the simulator and to sincronize each
+ * iteration. It emulates the mouse and the keyboard to restart
+ * the simulator. Check file 'automation'.
+ */
+//enable twiddle
+bool auto_tunning = false;
+//number of iterations for the simulator
 int  tunning_iteration = 800;
+//control twiddle stage
 int  tunning_stage = 0;
+//control which gain is being considered: kp=0, ki=1 and kd=2.
 int  tunning_gain = 0;
+//save best error
 double tunning_best_error = std::numeric_limits<long int>::max();
 double threshold = 0.001;
-//std::vector<double> p = {0.068,0.006,0.70};//{0.029,0.0031,1.22};
-std::vector<double> p = {0.068,0,0.70};//{0.029,0.0031,1.22};
+std::vector<double> p = {0.068,0.006,0.70};
 std::vector<double> best_p = {0,0,0};
 std::vector<double> dp = {.01,.001,.1};
 //PID BEST 0.11441 0.0084755 0.7801 || 0.270467
@@ -51,12 +61,12 @@ int main()
 
   //steering controller
   PID pid;
-  //pid.Init(0.11441,0.0084755,0.7801);
-  pid.Init(0.11441,0,0.7801);
+  pid.Init(0.11441,0.0084755,0.7801);  
 
   //speed controller
   PID pidSpeed;  
   pidSpeed.Init(0.1, 0.002,0);
+  //set point of 30 mph
   pidSpeed.SetPoint(30);
   
 
@@ -74,7 +84,8 @@ int main()
           // j[1] is the data JSON object
           double cte = std::stod(j[1]["cte"].get<std::string>());
           double speed = std::stod(j[1]["speed"].get<std::string>());
-          double angle = std::stod(j[1]["steering_angle"].get<std::string>());
+	  //remove warning
+          //double angle = std::stod(j[1]["steering_angle"].get<std::string>());
           double steer_value;
 
 	  if(auto_tunning){
@@ -140,6 +151,7 @@ int main()
 		std::cout << "PID NEW " << p[0] << " " << p[1] << " " << p[2] << "\n";
 		std::cout << "PID BEST " << best_p[0] << " " << best_p[1] << " " << best_p[2] << "\n";
 		std::cout << "Reset Simulator\n";
+		//sincronize with simulator
 		//wait for key stroke to continue		
 		getline(std::cin, input);
 	      }	      

@@ -1,0 +1,30 @@
+#!/bin/bash
+
+WINDOW_EMULATOR=39845894
+WINDOW_PID=18944307
+
+for i in `seq 1 200`;
+do
+	#esc window
+	xdotool keydown --window $WINDOW_EMULATOR Escape
+	sleep 1
+
+	#open emulator
+	xdotool windowfocus $WINDOW_EMULATOR;
+	xdotool mousemove 2731 512;
+	xdotool click 1; xdotool click 1; xdotool click 1;
+	xdotool mousemove 2412 646;
+	sleep 1
+	xdotool click 1;
+
+	sleep 3
+
+	#pid continue
+	xdotool windowfocus $WINDOW_PID;
+	xdotool windowactivate --sync $WINDOW_PID key Return
+	#xdotool windowactivate --sync $WINDOW_PID key Return
+	echo "LOOP AGAIN"
+
+	sleep 90
+
+done
