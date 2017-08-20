@@ -66,7 +66,7 @@ The Kd gain considers the rate change of error and tries to bring this rate to z
 
 ### 4.3 Ki (Integral Gain)
 
-The Ki gain reduces the persistent error, i.e. the accumulated error. The integral gain helps the controller to deal with the  ``systematic bias`` problem witch leads to a systematic error. This video illustrates the car following the lane center using a complete PID controller. The Ki gain helps to remove the residual error and approaches the car near to the center of the track. This [video](https://github.com/otomata/CarND-Controls-PID/blob/master/images/ki.mp4) shows the controller augmented with the ki gain. It is important to mention that the car oscillates a little bit more because the ki gain has been manually tuned. Next section, we presented the twiddle algorithm we used to fine tuning our PID controller.
+The Ki gain reduces the persistent error, i.e. the accumulated error. The integral gain helps the controller to deal with the  ``systematic bias`` problem witch leads to a systematic error. The Ki gain should help to remove the residual error to approximate the car near to the center of the track. This [video](https://github.com/otomata/CarND-Controls-PID/blob/master/images/ki.mp4) illustrates the car following the lane center using a complete PID controller. It is important to mention that the car oscillates a little bit more than PD controller because the ki gain has been manually tuned. Next section, we presented the twiddle algorithm we used to fine tuning our PID controller. 
 
 ## 5.PID Tunning
 
