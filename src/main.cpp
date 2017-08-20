@@ -1,8 +1,12 @@
 #include <uWS/uWS.h>
 #include <iostream>
+#include <string>
+#include <numeric>
+#include <sstream>
 #include "json.hpp"
 #include "PID.h"
 #include <math.h>
+#include <limits>
 
 // for convenience
 using json = nlohmann::json;
@@ -12,6 +16,19 @@ constexpr double pi() { return M_PI; }
 double deg2rad(double x) { return x * pi() / 180; }
 double rad2deg(double x) { return x * 180 / pi(); }
 
+//twiddle configuration
+bool auto_tunning = true;
+int  tunning_iteration = 800;
+int  tunning_stage = 0;
+int  tunning_gain = 0;
+double tunning_best_error = std::numeric_limits<long int>::max();
+double threshold = 0.001;
+//std::vector<double> p = {0.068,0.006,0.70};//{0.029,0.0031,1.22};
+std::vector<double> p = {0.068,0,0.70};//{0.029,0.0031,1.22};
+std::vector<double> best_p = {0,0,0};
+std::vector<double> dp = {.01,.001,.1};
+//PID BEST 0.11441 0.0084755 0.7801 || 0.270467
+  
 // Checks if the SocketIO event has JSON data.
 // If there is data the JSON object in string format will be returned,
 // else the empty string "" will be returned.
@@ -32,10 +49,18 @@ int main()
 {
   uWS::Hub h;
 
+  //steering controller
   PID pid;
-  // TODO: Initialize the pid variable.
+  //pid.Init(0.11441,0.0084755,0.7801);
+  pid.Init(0.11441,0,0.7801);
 
-  h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  //speed controller
+  PID pidSpeed;  
+  pidSpeed.Init(0.1, 0.002,0);
+  pidSpeed.SetPoint(30);
+  
+
+  h.onMessage([&pid, &pidSpeed](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -51,19 +76,100 @@ int main()
           double speed = std::stod(j[1]["speed"].get<std::string>());
           double angle = std::stod(j[1]["steering_angle"].get<std::string>());
           double steer_value;
-          /*
-          * TODO: Calcuate steering value here, remember the steering value is
-          * [-1, 1].
-          * NOTE: Feel free to play around with the throttle and speed. Maybe use
-          * another PID controller to control the speed!
-          */
-          
-          // DEBUG
-          std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
 
+	  if(auto_tunning){
+	    //Auto-tunning selected
+	    //Twiddle algorithm
+	    double sum = std::accumulate(dp.begin(),dp.end(),0.0);
+	    if(sum > threshold){
+	      if(tunning_gain > 2){
+		tunning_gain = 0;
+	      }
+	      if(tunning_iteration < 800){
+		//iterate with simulator for 800 times
+		pid.UpdateError(cte);
+		tunning_iteration++;
+	      } else {
+		//check error and, if necessary, change gains
+		double error = pid.TotalError();
+		std::cout << "STAGE " << tunning_stage << " GAIN " << tunning_gain << "\n";
+		std::cout << "PID " << p[0] << " " << p[1] << " " << p[2] << "\n";
+		std::cout << " ERRO - BEST " <<  error << " " << tunning_best_error << " TOLERANCE " << sum << "\n";
+		switch (tunning_stage){
+		case 0:
+		  p[tunning_gain] += dp[tunning_gain];
+		  //go to next twiddle stage
+		  tunning_stage = 1;
+		  tunning_iteration = 0;
+		  break;
+		case 1:
+		  if(error < tunning_best_error){
+		    tunning_best_error = error;
+		    dp[tunning_gain] *= 1.1;
+		    tunning_stage = 0;
+		    //go to next gain
+		    tunning_gain++;
+		    best_p[0] = p[0];
+		    best_p[1] = p[1];
+		    best_p[2] = p[2];
+		  } else {
+		    p[tunning_gain] -= 2*dp[tunning_gain];
+		    //go to next twiddle stage
+		    tunning_stage = 2;
+		    tunning_iteration = 0;
+		  }
+		  break;
+		case 2:
+		  if(error < tunning_best_error){
+		    tunning_best_error = error;
+		    dp[tunning_gain] *= 1.05;
+		    best_p[0] = p[0];
+		    best_p[1] = p[1];
+		    best_p[2] = p[2];
+		  } else {
+		    p[tunning_gain] += dp[tunning_gain];
+		    dp[tunning_gain] *= 0.90;
+		  }
+		  tunning_stage = 0;
+		  //go to next gain
+		  tunning_gain++;		  
+		  break;
+		}
+		pid.Init(p[0], p[1], p[2]);		
+		std::string input = "";
+		std::cout << "PID NEW " << p[0] << " " << p[1] << " " << p[2] << "\n";
+		std::cout << "PID BEST " << best_p[0] << " " << best_p[1] << " " << best_p[2] << "\n";
+		std::cout << "Reset Simulator\n";
+		//wait for key stroke to continue		
+		getline(std::cin, input);
+	      }	      
+	    } else {
+	      std::cout << "Finish " << sum << "\n";
+	      std::cout << p[0] << " " << p[1] << " " << p[2] << "\n";
+	    }
+
+	  } else { 
+	    pid.UpdateError(cte);
+	  }
+
+	  //Compute control response
+	  double control = pid.ComputeControlResponse();
+	  //check steering limits
+	  if (control > 1){
+	    steer_value = 1;
+	  } else if(control < -1){
+	    steer_value = -1;
+	  } else {
+	    steer_value = control;
+	  }	  
+       
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.3;
+
+	  //update speed error
+	  pidSpeed.UpdateError(speed);
+	  
+          msgJson["throttle"] = pidSpeed.ComputeControlResponse();//0.3;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);

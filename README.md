@@ -1,92 +1,94 @@
-# CarND-Controls-PID
-Self-Driving Car Engineer Nanodegree Program
+# PID Controller for the Udacity Simulator
 
----
+This project consists of a c++ implementation of PID controller to control the steering angle of a car using the Udacity simulator. The main goals of this project is to develop a c++ PID controller that successfully drives the vehicle around the track (Udacity simulator). Figure 1 depicts the car being controlled by the PID controller. 
 
-## Dependencies
+## 1.Access 
 
-* cmake >= 3.5
- * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1
-  * Linux: make is installed by default on most Linux distros
-  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
-  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* gcc/g++ >= 5.4
-  * Linux: gcc / g++ is installed by default on most Linux distros
-  * Mac: same deal as make - [install Xcode command line tools]((https://developer.apple.com/xcode/features/)
-  * Windows: recommend using [MinGW](http://www.mingw.org/)
-* [uWebSockets](https://github.com/uWebSockets/uWebSockets)
-  * Run either `./install-mac.sh` or `./install-ubuntu.sh`.
-  * If you install from source, checkout to commit `e94b6e1`, i.e.
-    ```
-    git clone https://github.com/uWebSockets/uWebSockets 
-    cd uWebSockets
-    git checkout e94b6e1
-    ```
-    Some function signatures have changed in v0.14.x. See [this PR](https://github.com/udacity/CarND-MPC-Project/pull/3) for more details.
-* Simulator. You can download these from the [project intro page](https://github.com/udacity/self-driving-car-sim/releases) in the classroom.
+The source code for this project is available at [project code](https://github.com/otomata/CarND-Controls-PID).
 
-There's an experimental patch for windows in this [PR](https://github.com/udacity/CarND-PID-Control-Project/pull/3)
+## 2.Files
 
-## Basic Build Instructions
+The following files are part of this project: 
+* pid.cpp:   PID controller class definition;
+* main.cpp:  main file that integrates the PID controller with the simulator.
+* images: 
+** fusion_data1.png:  Estimation using Lidar and Radar readings for dataset 1;
+** fusion_data2.png:  Estimation using Lidar and Radar readings for dataset 2;
+** nis_radar.png:  NIS values for radar estimations;
+** nis_laser.png:  NIS values for lidar estimations;
+** lidar.png:    Estimation using only Lidar readings;
+** radar.png: Estimation using only Radar readings;
 
-1. Clone this repo.
-2. Make a build directory: `mkdir build && cd build`
-3. Compile: `cmake .. && make`
-4. Run it: `./pid`. 
+### Dependency
 
-## Editor Settings
+This project requires the following packages to work:
+* Udacity Simulator [https://github.com/udacity/self-driving-car-sim/releases/](https://github.com/udacity/self-driving-car-sim/releases/);
+* cmake 3.5 or above;
+* make 4.1 or above;
+* gcc/g++: 5.4 or above;
+* uWebSocketIO;
 
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
+### WebSocketIO
 
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
+This project uses the open source package called WebScokectIO to facilitate the communication between the PID controller and the Udacity Simulator. To install all the websocketio libs, execute the script ``install-ubuntu.sh`` from the project repository directory.
 
-## Code Style
+## 3.How to use this project
 
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
+To run this project, you first need to compile the code. After the code is compiled, please, run the Udacity simulator and the PID binary created at the build folder.
 
-## Project Instructions and Rubric
+### Compiling and Running
 
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
+The main program can be built and run by doing the following from the project top directory.
 
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/f1820894-8322-4bb3-81aa-b26b3c6dcbaf/lessons/e8235395-22dd-4b87-88e0-d108c5e5bbf4/concepts/6a4d8d42-6a04-4aa6-b284-1697c0fd6562)
-for instructions and the project rubric.
+1. mkdir build
+2. cd build
+3. cmake ..
+4. make
+5. ./pid
+6. Run the Udacity Simulator (./term2_simulator)
 
-## Hints!
+## 4.PID 
 
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
+The PID (Proportional, Integral and Derivative) controller is a closed loop controller widely used by the industry.  It computes the system input variable from the error e(t) between the desired set point and the system output (process variable). The control response (system input) is calculated by applying the proportional, derivative and integral gains over e(t).
 
-## Call for IDE Profiles Pull Requests
+For this project, the PID controller is used to control the steering angle from the ``cross track error`` e(t) (car distance from the track center). Therefore, the system input is the steering angle, the output is the car distance from the center and the setpoin it zero (closest to the center as possible). 
 
-Help your fellow students!
+![equation](http://latex.codecogs.com/gif.latex?%5Calpha%20%3D%20-K_pe%28t%29%20-K_d%5Cfrac%7Bde%28t%29%7D%7Bdt%7D%20-%20K_i%5Csum%20e%28t%29)
 
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
+### 4.1 Kp (Proportional Gain)
 
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
+The Kp gain results into a proportional control response. In the context of this project, it means that the steer input is in proportion to the Cross Track error. However, the proportional control alone results into a marginally stable system because the car will never converge to the set point, it will slightly overshoot. In addition, increasing the value of Kp will make the car react faster but it will also oscillate more around the center lane (set point). This [video](https://github.com/otomata/CarND-Controls-PID/images/kp.mp4) shows the oscillation of the car trajectory using a proportional controller. 
 
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
+### 4.2 Kd (Derivative Gain)
 
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
+The Kd gain considers the rate change of error and tries to bring this rate to zero. The derivative gain complements the proportional output by reducing the overshoot, it mains goal is to flattening the car trajectory. This [video](https://github.com/otomata/CarND-Controls-PID/images/kd.mp4) presents the smoothed trajectory of the car using a proportional-derivative controller. 
 
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
 
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
+### 4.3 Ki (Integral Gain)
+
+The Ki gain reduces the persistent error, i.e. the accumulated error. The integral gain helps the controller to deal with the  ``systematic bias`` problem witch leads to a systematic error. This video illustrates the car following the lane center using a complete PID controller. The Ki gain helps to remove the residual error and approaches the car near to the center of the track. This [video](https://github.com/otomata/CarND-Controls-PID/images/ki.mp4) shows the controller augmented with the ki gain. It is important to mention that the car oscillates a little bit more because the ki gain has been manually tuned. Next section, we presented the twiddle algorithm we used to fine tuning our PID controller.
+
+## 5.PID Tunning
+
+The PID tuning for this project followed a mix of manual and automatic tuning approaches. First, due to the simulation time (~90 seconds) required to evaluate a set of PID gains, we decided to first follow a manual approach to find the gain orders. We observed the following orders of magnitude for the PID gains:
+
+⋅⋅* Proportional: order of 0.01
+..* Integral: order of 0.001
+..* Derivative: order of 0.1
+
+
+The second step it to use the [Twiddle Algorithm](https://martin-thoma.com/twiddle/) to fine tuning the PID gains. We used the gain orders we had previously manually found to help the Twiddle algorithm to converge faster by setting the tiwdle starting vectors to: 
+
+..* Initial PID Vector: {0.06, 0.006, 0.7} (values manually tunned)
+..* Potential changes: {.01,.001,.1}
+
+The twiddle algorithm evaluates every new set of parameters and checks if the error is smaller. If the error is greater, the potential change vector is changed and a new set of parameters is attempted. However, because of the different corners radius of the track, we have to evaluate the PID controller into a long run, in order to test if the set of parameter (gains) is well adapted for the track, and not only for a small subset. This approach makes the experiment really long; 40 iterations took almost one hour; we have decided to stop the algorithm after 100 iterations. 
+
+The final PID controller successfully drives the car around the track without pop up onto ledges or roll over any surfaces that would otherwise be considered unsafe (if humans where in the vehicle). The file PID parameters are shown below:
+
+⋅⋅* Kp: 0.11441
+..* Ki: 0.0084755
+..* Kd: 0.7801
+
+This [video](https://github.com/otomata/CarND-Controls-PID/images/pid.mp4) shows the car driving around the corner with the PID controller set with the parameters presented above. 
+
