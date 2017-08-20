@@ -21,7 +21,7 @@ double rad2deg(double x) { return x * 180 / pi(); }
  * Use twiddle algorithm to search for the best PID gains.
  * Use xdotool to restart the simulator and to sincronize each
  * iteration. It emulates the mouse and the keyboard to restart
- * the simulator. Check file 'automation'.
+ * the simulator. Check file 'automate'.
  */
 //enable twiddle
 bool auto_tunning = false;
