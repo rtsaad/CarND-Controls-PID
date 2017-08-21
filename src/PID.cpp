@@ -4,6 +4,7 @@
 #include <iostream>
 #include <numeric>
 #include <list>
+#include <ctime>
 
 using namespace std;
 
@@ -31,7 +32,9 @@ void PID::Init(double kp, double ki, double kd) {
   //set PID gains
   Kp = kp;
   Ki = ki;
-  Kd = kd; 
+  Kd = kd;
+
+  
   
 }
 
@@ -46,10 +49,23 @@ void PID::UpdateError(double cte) {
   if(setpoint!=0){
     cte -= setpoint;
   }
-  
-  d_error  = (cte - p_error);
+
+  if(p_error == 0){
+    time_stamp = clock();
+  }
+
+  time_t current_time = clock();
+
+  double delta_t = (double(current_time - time_stamp) / CLOCKS_PER_SEC);
+  time_stamp = current_time;  
+
+  if(delta_t > 0){
+    d_error  = (cte - p_error)/delta_t;
+  } else {
+    d_error = 0;
+  }
   p_error  = cte;
-  i_error += cte;
+  i_error += cte*delta_t;
   error += cte*cte;
   n++;
 }

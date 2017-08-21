@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <list>
+#include <time.h>
 
 class PID {
 public:
@@ -15,6 +16,9 @@ public:
   
   //Total error
   double error;
+
+  //track time
+  time_t time_stamp;
 
   //setpoint
   double setpoint;

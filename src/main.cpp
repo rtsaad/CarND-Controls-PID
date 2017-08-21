@@ -34,10 +34,10 @@ int  tunning_gain = 0;
 //save best error
 double tunning_best_error = std::numeric_limits<long int>::max();
 double threshold = 0.001;
-std::vector<double> p = {0.068,0.006,0.70};
+std::vector<double> p = {0.01,0,0.0007};
 std::vector<double> best_p = {0,0,0};
-std::vector<double> dp = {.01,.001,.1};
-//PID BEST 0.11441 0.0084755 0.7801 || 0.270467
+std::vector<double> dp = {0.1,.001,0.0001};
+//PID BEST 0.11 0.00415711 0.00087019 || 0.708059
   
 // Checks if the SocketIO event has JSON data.
 // If there is data the JSON object in string format will be returned,
@@ -60,8 +60,8 @@ int main()
   uWS::Hub h;
 
   //steering controller
-  PID pid;
-  pid.Init(0.11441,0.0084755,0.7801);  
+  PID pid;  
+  pid.Init(0.11,0.00415711,0.00087019);  
 
   //speed controller
   PID pidSpeed;  
